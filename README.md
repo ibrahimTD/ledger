@@ -56,28 +56,7 @@ To reset the database: `docker compose down -v`
 
 ## API Endpoints
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| `POST` | `/auth/register` |  Create account, returns JWT |
-| `POST` | `/auth/login` |  Login, returns JWT |
-| `POST` | `/api/transactions` |  Create a transaction |
-| `GET` | `/api/transactions` |  Get paginated transactions |
-| `GET` | `/api/transactions?from=&to=` | Filter by date range |
-
-### Example — Register
-```bash
-curl -X POST http://localhost:8080/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"userName":"ibrahim","password":"password123","email":"ibrahim@example.com"}'
-```
-
-### Example — Create Transaction
-```bash
-curl -X POST http://localhost:8080/api/transactions \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"amount":1500.00,"currency":"USD","description":"Payment","counterPartyIban":"GB29NWBK60161331926819"}'
-```
+All of the endpoints are covered on the Swagger documentation
 
 ---
 
