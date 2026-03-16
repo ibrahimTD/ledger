@@ -8,7 +8,6 @@ import com.ibrahim.ledger.mapper.UserMapper;
 import com.ibrahim.ledger.model.UserModel;
 import com.ibrahim.ledger.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,7 +28,7 @@ public class UserService implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUserName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("user not found " + username));
     }
@@ -55,7 +54,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new RuntimeException("invalid username or password"));
 
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("invalid password");
+            throw new RuntimeException("invalid username or password");
         }
 
         String token = jwtUtil.generateToken(user);

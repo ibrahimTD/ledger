@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.UUID;
 
 @Component
 public class JwtUtil {
@@ -49,10 +48,6 @@ public class JwtUtil {
         return extractClaims(token).getSubject();
     }
 
-    public UUID extractUserId(String token) {
-        String username = extractUsername(token);
-        return UUID.fromString(username);
-    }
 
     private boolean isTokenExpired(String token) {
         return extractClaims(token).getExpiration().before(new Date());
