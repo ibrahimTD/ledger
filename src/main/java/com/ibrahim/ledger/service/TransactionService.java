@@ -23,6 +23,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
 
+    @Transactional
     public TransactionResponseDto createTransaction(TransactionRequestDto request, UserModel currentUser) {
 
         TransactionModel transaction = transactionMapper.toEntity(request);

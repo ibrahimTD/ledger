@@ -1,13 +1,14 @@
 package com.ibrahim.ledger.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.NonNull;
 
 @Data
 public class LoginRequestDto {
-    @NonNull
+
+    @NotBlank(message = "Username is required")
     private String userName;
 
-    @NonNull
+    @NotBlank(message = "Password is required")
     private String password;
 }
