@@ -1,0 +1,15 @@
+target/
+
+.git/
+.gitignore
+.gitattributes
+
+.idea/
+*.iml
+
+Dockerfile
+docker-compose.yml
+
+.DS_Store
+Thumbs.db
+

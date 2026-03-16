@@ -1,0 +1,41 @@
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: ledger-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ledger
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ledger"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ledger-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/ledger
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: admin
+      JWT_SECRET: change-me-in-production-use-a-long-random-string
+      JWT_EXPIRATION: 86400000
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+

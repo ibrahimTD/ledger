@@ -1,0 +1,456 @@
+{
+  "info": {
+    "name": "Transaction Ledger API",
+    "description": "RS2 Recruitment Task — Secure Transaction Ledger API\n\n## How to use\n1. Run 'Register' to create an account\n2. Copy the token from the response\n3. The collection auto-saves it to the 'jwt_token' variable\n4. All protected endpoints use it automatically",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set('jwt_token', response.token);",
+                  "    console.log('Token saved automatically');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"ibrahim\",\n  \"password\": \"password123\",\n  \"email\": \"ibrahim@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Creates a new user account and returns a JWT token.\n\nThe test script automatically saves the token to the 'jwt_token' collection variable so all other requests use it without manual copy-paste."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set('jwt_token', response.token);",
+                  "    console.log('Token saved automatically');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"ibrahim\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates an existing user and returns a fresh JWT token.\n\nThe test script automatically saves the token to the 'jwt_token' collection variable."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Create Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1500.00,\n  \"currency\": \"USD\",\n  \"description\": \"Payment for services\",\n  \"counterPartyIban\": \"GB29NWBK60161331926819\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Creates a new financial transaction linked to the authenticated user.\n\n## Validation rules\n- amount: must be positive\n- currency: exactly 3 characters (e.g. USD, EUR)\n- description: optional, max 500 characters\n- counterPartyIban: must match IBAN format (2 uppercase letters + 13-32 alphanumeric)"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"userId\": \"7ab12c34-1234-5678-abcd-1234567890ab\",\n  \"amount\": 1500.00,\n  \"currency\": \"USD\",\n  \"description\": \"Payment for services\",\n  \"counterPartyIban\": \"GB29NWBK60161331926819\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Transaction - Invalid (Negative Amount)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": -500.00,\n  \"currency\": \"USD\",\n  \"description\": \"This should fail\",\n  \"counterPartyIban\": \"GB29NWBK60161331926819\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Demonstrates validation — negative amount should return 400 Bad Request with a clear error message."
+          },
+          "response": [
+            {
+              "name": "400 Bad Request",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"timestamp\": \"2024-01-15T10:30:00Z\",\n  \"status\": 400,\n  \"error\": \"Validation failed\",\n  \"details\": {\n    \"amount\": \"Amount must be positive\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Transaction - Invalid IBAN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 200.00,\n  \"currency\": \"EUR\",\n  \"description\": \"Invalid IBAN test\",\n  \"counterPartyIban\": \"NOT-AN-IBAN\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Demonstrates IBAN validation — invalid format should return 400 Bad Request."
+          },
+          "response": [
+            {
+              "name": "400 Bad Request",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"timestamp\": \"2024-01-15T10:30:00Z\",\n  \"status\": 400,\n  \"error\": \"Validation failed\",\n  \"details\": {\n    \"counterPartyIban\": \"Invalid IBAN format\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Transactions (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transactions?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page number (0-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Number of transactions per page"
+                }
+              ]
+            },
+            "description": "Returns a paginated list of transactions for the authenticated user only.\n\nBOLA protection — you will never see another user's transactions regardless of what token you send."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"content\": [\n    {\n      \"id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n      \"userId\": \"7ab12c34-1234-5678-abcd-1234567890ab\",\n      \"amount\": 1500.00,\n      \"currency\": \"USD\",\n      \"description\": \"Payment for services\",\n      \"counterPartyIban\": \"GB29NWBK60161331926819\",\n      \"createdAt\": \"2024-01-15T10:30:00Z\"\n    }\n  ],\n  \"pageable\": {\n    \"pageNumber\": 0,\n    \"pageSize\": 10\n  },\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"last\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Transactions by Date Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transactions?page=0&size=10&from=2026-03-15T00:00:00Z&to=2026-03-16T23:59:59Z",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-03-15T00:00:00Z",
+                  "description": "Start date in ISO 8601 format"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-03-16T23:59:59Z",
+                  "description": "End date in ISO 8601 format"
+                }
+              ]
+            },
+            "description": "Returns transactions filtered by date range.\n\nUses the (user_id, created_at) database index for optimized performance at scale.\n\nDates must be in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"content\": [],\n  \"totalElements\": 0,\n  \"totalPages\": 0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Transactions - No Token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Demonstrates that protected endpoints reject requests with no token — returns 401 Unauthorized."
+          },
+          "response": [
+            {
+              "name": "401 Unauthorized",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"timestamp\": \"2024-01-15T10:30:00Z\",\n  \"status\": 401,\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BOLA Security Test",
+      "item": [
+        {
+          "name": "Step 1 - Register User A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set('jwt_token', response.token);",
+                  "    pm.collectionVariables.set('token_user_a', response.token);",
+                  "    console.log('User A token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"userA\",\n  \"password\": \"password123\",\n  \"email\": \"userA@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register User A — their token is saved to 'token_user_a' variable."
+          }
+        },
+        {
+          "name": "Step 2 - Create Transaction as User A",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user_a}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 9999.00,\n  \"currency\": \"USD\",\n  \"description\": \"User A secret transaction\",\n  \"counterPartyIban\": \"GB29NWBK60161331926819\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Creates a transaction as User A."
+          }
+        },
+        {
+          "name": "Step 3 - Register User B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set('token_user_b', response.token);",
+                  "    console.log('User B token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"userB\",\n  \"password\": \"password123\",\n  \"email\": \"userB@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register User B — their token is saved to 'token_user_b' variable."
+          }
+        },
+        {
+          "name": "Step 4 - Get Transactions as User B (BOLA Check)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_user_b}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transactions?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "BOLA verification — User B fetches their transactions.\n\nExpected result: empty list (or only User B's own transactions).\nUser A's transaction must NOT appear here.\n\nThis proves BOLA prevention is working correctly."
+          }
+        }
+      ]
+    }
+  ]
+}
