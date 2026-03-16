@@ -1,6 +1,7 @@
 # Architecture 
 <img width="640" height="415" alt="image" src="https://github.com/user-attachments/assets/f49dfc86-b587-4394-a991-263101ca6e63" />
----
+
+
 # Transaction Ledger API
 
 RESTful financial transaction ledger built with Spring Boot , PostgreSQL, JWT authentication, and Flyway migrations.
